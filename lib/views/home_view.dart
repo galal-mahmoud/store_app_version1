@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
 
-import '../helper/helper_methods.dart';
+import 'package:flutter/material.dart';
+import 'package:store_app_version1/services/all_products_services.dart';
+import '../models/product_model.dart';
+import '../widgets/custom_card.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -18,74 +20,36 @@ class HomeView extends StatelessWidget {
           IconButton(onPressed: () {}, icon: const Icon(Icons.shopping_cart)),
         ],
       ),
-      body: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2,),
-        itemBuilder: (context, index){
-            return const CustomCard();
-        },
+      body: FutureBuilder<List<ProductModel>>(
+          future: AllProductsServices().getAllProducts(),
+          builder: (context, snapshot){
+            if(snapshot.hasData){
+              List<ProductModel> products = snapshot.data!;
+              return Padding(
+                padding: const EdgeInsetsDirectional.only(start: 8.0, end: 8.0, top: 50.0),
+                child: GridView.builder(
+                  clipBehavior: Clip.none,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 1.2,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 60.0
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return CustomCard(
+                      productModel: products[index],
+                    );
+                  },
+                ),
+              );
+            }else{
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+      }
       ),
-    );
-  }
-}
-
-class CustomCard extends StatelessWidget {
-  const CustomCard({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-            clipBehavior: Clip.none,
-      children: [
-        Container(
-          decoration: BoxDecoration(boxShadow: [
-            BoxShadow(
-                blurRadius: 40,
-                color: Colors.grey.withOpacity(0.2),
-                spreadRadius: 4,
-                offset: const Offset(3, 3))
-          ]),
-          child: Card(
-            color: Colors.white,
-            child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                    bottom: 16.0, start: 8.0, end: 8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'product name',
-                      style:
-                          buildTextStyle(fontSize: 16.0, color: Colors.black),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'product description',
-                          style: buildTextStyle(fontSize: 14.0),
-                        ),
-                        const Icon(
-                          Icons.favorite,
-                          color: Colors.red,
-                        ),
-                      ],
-                    ),
-                  ],
-                )),
-          ),
-        ),
-        Positioned(
-          bottom: 20.0,
-          right: 10.0,
-          child: Image.network(
-          'https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg',
-          height: 120,
-          width: 100,
-        ),)
-      ],
     );
   }
 }
